@@ -1,0 +1,1604 @@
+[gd_scene load_steps=56 format=2]
+
+[ext_resource path="res://-Asset/!OutOfMonitor/FK/!FriendKill/Screen/Crack.png" type="Texture" id=1]
+[ext_resource path="res://-Asset/!OutOfMonitor/FK/!FriendKill/Screen/gun.wav" type="AudioStream" id=2]
+[ext_resource path="res://-Asset/!OutOfMonitor/FK/!FriendKill/Screen/Blood0.png" type="Texture" id=3]
+[ext_resource path="res://-Asset/!OutOfMonitor/FK/!FriendKill/Screen/selct.png" type="Texture" id=4]
+[ext_resource path="res://-Asset/!OutOfMonitor/FK/!FriendKill/Screen/flash0.png" type="Texture" id=5]
+[ext_resource path="res://-Asset/!OutOfMonitor/FK/!FriendKill/Screen/Blood1.png" type="Texture" id=6]
+[ext_resource path="res://-Asset/App001/Lines/creepy_or.wav" type="AudioStream" id=7]
+[ext_resource path="res://-Asset/!OutOfMonitor/FK/!FriendKill/Screen/craked.wav" type="AudioStream" id=8]
+[ext_resource path="res://-Asset/!OutOfMonitor/FK/!FriendKill/Screen/dryfire.wav" type="AudioStream" id=9]
+[ext_resource path="res://-Asset/!OutOfMonitor/FK/!FriendKill/Screen/C1.png" type="Texture" id=10]
+[ext_resource path="res://-Asset/!OutOfMonitor/FK/!FriendKill/Screen/Border.png" type="Texture" id=11]
+[ext_resource path="res://-Asset/!OutOfMonitor/FK/!FriendKill/Screen/hammer.wav" type="AudioStream" id=12]
+[ext_resource path="res://-Asset/!OutOfMonitor/FK/!FriendKill/Screen/C0.png" type="Texture" id=13]
+[ext_resource path="res://-Asset/!OutOfMonitor/FK/!FriendKill/Screen/Blood2.png" type="Texture" id=14]
+[ext_resource path="res://-Asset/!ENGINE_TODELETE/example.png" type="Texture" id=15]
+[ext_resource path="res://-Asset/Theme/Font2N.ttf" type="DynamicFontData" id=35]
+[ext_resource path="res://-Asset/KinitoWebWorld/Def/HideAndSeek/Alarm/ticktokgosetheclock.wav" type="AudioStream" id=38]
+[ext_resource path="res://-Asset/KinitoWebWorld/Def/Select.wav" type="AudioStream" id=40]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends Control
+export var over = false
+var shootable = false
+func _randFriend():
+	if(App.steamWorking):
+		var friendCount = Steam.getFriendCount(Steam.FRIEND_FLAG_IMMEDIATE)
+		#$Cen.position = OS.window_size / 2
+		#$Cen.scale = Vars.get(\"nodeScale\")
+		if friendCount > 2:
+			var rng = int(rand_range(0,friendCount))
+			var steam_id = Steam.getFriendByIndex((rng),Steam.FRIEND_FLAG_IMMEDIATE)
+			var name = str(Steam.getFriendPersonaName(steam_id))
+			$Cen/Anim/F1/Icon.texture = _id_to_image(steam_id)
+			$Cen/Anim/F1/text.bbcode_text = \"[center]\" +name
+			
+			var rng2 = int(rand_range(0,friendCount))
+			while rng2 == rng:
+				rng2 = int(rand_range(0,friendCount))
+			steam_id = Steam.getFriendByIndex((rng2),Steam.FRIEND_FLAG_IMMEDIATE)
+			name = str(Steam.getFriendPersonaName(steam_id))
+			$Cen/Anim/F2/Icon.texture = _id_to_image(steam_id)
+			$Cen/Anim/F2/text.bbcode_text = \"[center]\" +name
+		else:
+			_noSteam()
+	else:
+		_noSteam()
+
+func _noSteam():
+	pass
+
+func _id_to_image(steam_id):
+	var IMAGE: Dictionary = Steam.getImageSize(Steam.getMediumFriendAvatar(steam_id))
+	var IMAGE_DATA: Dictionary = Steam.getImageRGBA(Steam.getMediumFriendAvatar(steam_id))
+
+	var AVATAR: Image = Image.new()
+	var AVATAR_TEXTURE: ImageTexture = ImageTexture.new()
+	if IMAGE['width'] <= 0:
+		return
+	AVATAR.create(IMAGE['width'], IMAGE['height'], false, Image.FORMAT_RGBAF)
+	var size = 64
+	AVATAR.lock()
+	if IMAGE_DATA.has(\"buffer\"):
+		for y in range(0, size):
+			for x in range(0, size):
+				var pixel: int = 4 * (x + y * size)
+				var r: float = float(IMAGE_DATA['buffer'][pixel]) / 255
+				var g: float = float(IMAGE_DATA['buffer'][pixel+1]) / 255
+				var b: float = float(IMAGE_DATA['buffer'][pixel+2]) / 255
+				var a: float = float(IMAGE_DATA['buffer'][pixel+3]) / 255
+				AVATAR.set_pixel(x, y, Color(r, g, b, a))
+	AVATAR.unlock()
+	AVATAR_TEXTURE.create_from_image(AVATAR)
+	return AVATAR_TEXTURE
+
+func _ready():
+	randomize()
+	#Wallpaper.call(\"M5\")
+	
+	Tab.soloSurvey = false
+	Tab.appParent.addCam()
+	Tab.set_window_position(19,OS.window_position * Vars.get(\"nodeScale\"))
+	
+	#Steam.steamInit()
+#	self.position = Vars.get(\"ScreenSize\")/Vars.get(\"nodeScale\")/2 
+#	yield(get_tree().create_timer(1.6), \"timeout\")
+	
+	var mainScreen = 0
+	for screen in OS.get_screen_count():
+		if OS.get_screen_position(screen) == Vector2.ZERO:
+			mainScreen = screen
+			
+	get_tree().get_root().set_transparent_background(true)
+	OS.window_position = OS.get_screen_position(mainScreen) + Vector2(0,1)
+	OS.window_borderless = true
+	OS.window_size = OS.get_screen_size(mainScreen) + Vector2(0,-1)
+	OS.set_window_always_on_top(true)
+	
+	var scaleB = 1*(OS.get_screen_size(mainScreen).x/1920)
+	$Point/Scale.scale = Vector2(scaleB,scaleB)
+
+	$Point/Scale/Shader/C0._calc(scaleB)
+	$Point/Scale/Shader/C1._calc(scaleB)
+	$Point.visible = false
+	
+	
+	_randFriend()
+	
+	
+var oneTime = false
+func _process(delta):
+	if shootable:
+		if oneTime == false:
+			if Input.is_action_just_pressed(\"click\"):
+				$Point/gun.play()
+				
+				$Point.visible = true
+				$Point/Buz.play()
+				$Point/Shoot.play(\"gun\")
+				oneTime = true
+				$Cen/Anim/Dream.stop()
+				$Cen/Anim/RichTextLabel.visible = false
+				$Cen/Anim/clock.stop()
+				var mp = ((get_global_mouse_position()- Tab.window_position(19) - self.rect_position )*1.5)  
+				if mp.x > (OS.window_size/2).x:
+					$Point.scale.x = -1
+				else:
+					$Point.scale.x = 1
+				$Point.position = mp
+				yield(get_tree(), \"idle_frame\")
+				Wallpaper.call(\"M4\")
+	else:
+		if Input.is_action_just_pressed(\"click\"):
+			$Cen/Anim/dryfire.play()
+			pass
+
+
+func _on_L_mouse_entered():
+	$Cen/Anim/Sel.play(\"L\")
+	shootable = true
+
+func _on_L_mouse_exited():
+	$Cen/Anim/Sel.play(\"X\")
+	shootable = false
+
+func _on_R_mouse_entered():
+	$Cen/Anim/Sel.play(\"R\")
+	shootable = true
+
+func _on_R_mouse_exited():
+	$Cen/Anim/Sel.play(\"X\")
+	shootable = false
+"
+
+[sub_resource type="DynamicFont" id=2]
+font_data = ExtResource( 35 )
+
+[sub_resource type="DynamicFont" id=3]
+size = 13
+font_data = ExtResource( 35 )
+
+[sub_resource type="Animation" id=4]
+tracks/0/type = "value"
+tracks/0/path = NodePath("Selc:visible")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ true ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("Selc:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( -135, 100.52 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("Selc/select:playing")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ true ]
+}
+
+[sub_resource type="Animation" id=5]
+tracks/0/type = "value"
+tracks/0/path = NodePath("Selc:visible")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ true ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("Selc:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( 135, 100.52 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("Selc/select:playing")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ true ]
+}
+
+[sub_resource type="Animation" id=6]
+tracks/0/type = "value"
+tracks/0/path = NodePath("Selc:visible")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ false ]
+}
+
+[sub_resource type="Shader" id=7]
+code = "shader_type canvas_item;
+
+uniform float brightness = 1.0;
+uniform float contrast = 1.0;
+uniform float saturation = 1.0;
+
+void fragment() {
+    vec4 tex = texture(SCREEN_TEXTURE, SCREEN_UV);
+	vec3 c = textureLod(SCREEN_TEXTURE, SCREEN_UV, 0.0).rgb;
+	c.rgb = mix(vec3(0.0), c.rgb, brightness);
+	c.rgb = mix(vec3(0.5), c.rgb, contrast);
+	c.rgb = mix(vec3(dot(vec3(1.0), c.rgb)*0.33333), c.rgb, saturation);
+	COLOR.rgb = c;
+    COLOR.a = tex.a;
+}"
+
+[sub_resource type="ShaderMaterial" id=8]
+shader = SubResource( 7 )
+shader_param/brightness = 0.789
+shader_param/contrast = 2.0
+shader_param/saturation = 0.0
+
+[sub_resource type="Shader" id=9]
+code = "shader_type canvas_item;
+
+uniform int levels = 3;
+uniform float spread = 0.01;
+uniform float craxy = 1.00;
+vec3 chromatic_slice(float t) {
+    vec3 res = vec3(1.0 - t, 1.0 - abs(t - 1.0), t - 1.0);
+    return max(res, 0.0);
+}
+
+void fragment() {
+    vec3 sum;
+    vec3 finalColor = vec3(0);
+    vec2 offset = (UV - vec2(0.5)) * vec2(1, -1);
+    
+    for (int i = 0; i < levels; i++) {
+        float t = 2.0 * float(i) / float(levels - 1); // range 0.0->2.0
+        vec3 slice = chromatic_slice(t);
+        sum += slice;
+        vec2 slice_offset = (t - 1.0) * spread * offset;
+        vec4 sample = texture(SCREEN_TEXTURE, SCREEN_UV + slice_offset);
+        finalColor += slice * sample.rgb * sample.a; // Multiply by alpha channel
+    }
+    
+    finalColor /= sum;
+    
+    // Set the output color with proper alpha
+	
+    COLOR = vec4(finalColor, texture(SCREEN_TEXTURE,SCREEN_UV).a *craxy);
+}
+"
+
+[sub_resource type="ShaderMaterial" id=10]
+shader = SubResource( 9 )
+shader_param/levels = 3
+shader_param/spread = 0.057
+shader_param/craxy = 0.543
+
+[sub_resource type="Animation" id=11]
+resource_name = "!New"
+length = 50.0
+tracks/0/type = "value"
+tracks/0/path = NodePath("RichTextLabel:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( -9, -0.1, 15.6 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 0.00988897 ), Color( 1, 1, 1, 0.0313726 ) ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("BackBufferCopy2/ColorRect:material:shader_param/levels")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( -4.5, 0, 1 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ 9, 3, 3 ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("BackBufferCopy2/ColorRect:material:shader_param/spread")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( -4.5, 0, 1 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ 1.0, 0.057, 0.057 ]
+}
+tracks/3/type = "value"
+tracks/3/path = NodePath("BackBufferCopy2/ColorRect:material:shader_param/craxy")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/keys = {
+"times": PoolRealArray( -3.6, 0, 1 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ 1.0, 0.543, 0.543 ]
+}
+tracks/4/type = "value"
+tracks/4/path = NodePath("F1:visible")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/keys = {
+"times": PoolRealArray( -9.3, 1.1, 2 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 1,
+"values": [ false, false, true ]
+}
+tracks/5/type = "value"
+tracks/5/path = NodePath("F2:visible")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/keys = {
+"times": PoolRealArray( -9.3, 1.1, 6.2 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 1,
+"values": [ false, false, true ]
+}
+tracks/6/type = "value"
+tracks/6/path = NodePath("OR:visible")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/keys = {
+"times": PoolRealArray( -9.3, 3.8, 4.1, 5.1 ),
+"transitions": PoolRealArray( 1, 1, 1, 1 ),
+"update": 1,
+"values": [ false, false, true, false ]
+}
+tracks/7/type = "value"
+tracks/7/path = NodePath("clock:playing")
+tracks/7/interp = 1
+tracks/7/loop_wrap = true
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/keys = {
+"times": PoolRealArray( 0, 5.8, 15.8 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 1,
+"values": [ false, true, false ]
+}
+tracks/8/type = "value"
+tracks/8/path = NodePath("L:visible")
+tracks/8/interp = 1
+tracks/8/loop_wrap = true
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/keys = {
+"times": PoolRealArray( 0, 7.3 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 1,
+"values": [ false, true ]
+}
+tracks/9/type = "value"
+tracks/9/path = NodePath("R:visible")
+tracks/9/interp = 1
+tracks/9/loop_wrap = true
+tracks/9/imported = false
+tracks/9/enabled = true
+tracks/9/keys = {
+"times": PoolRealArray( 0, 7.3 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 1,
+"values": [ false, true ]
+}
+tracks/10/type = "value"
+tracks/10/path = NodePath("bock:pitch_scale")
+tracks/10/interp = 1
+tracks/10/loop_wrap = true
+tracks/10/imported = false
+tracks/10/enabled = true
+tracks/10/keys = {
+"times": PoolRealArray( 0, 1.9, 2.7, 5.9, 6.5 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1 ),
+"update": 0,
+"values": [ 0.4, 0.4, 0.35, 0.35, 0.3 ]
+}
+tracks/11/type = "value"
+tracks/11/path = NodePath("bock:playing")
+tracks/11/interp = 1
+tracks/11/loop_wrap = true
+tracks/11/imported = false
+tracks/11/enabled = true
+tracks/11/keys = {
+"times": PoolRealArray( 0, 2, 6.1, 7.9 ),
+"transitions": PoolRealArray( 1, 1, 1, 1 ),
+"update": 1,
+"values": [ false, true, true, false ]
+}
+tracks/12/type = "value"
+tracks/12/path = NodePath("or:playing")
+tracks/12/interp = 1
+tracks/12/loop_wrap = true
+tracks/12/imported = false
+tracks/12/enabled = true
+tracks/12/keys = {
+"times": PoolRealArray( 0, 3.3, 4.2, 5.2 ),
+"transitions": PoolRealArray( 1, 1, 1, 1 ),
+"update": 1,
+"values": [ false, false, true, false ]
+}
+
+[sub_resource type="Animation" id=12]
+resource_name = "SEQ"
+length = 4.0
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1, 1, 1, 1, 1 ),
+"update": 0,
+"values": [ Vector2( -50, 0 ), Vector2( -35, -35 ), Vector2( 0, -50 ), Vector2( 35, -35 ), Vector2( 50, 0 ), Vector2( 35, 35 ), Vector2( 0, 50 ), Vector2( -35, 35 ), Vector2( -50, 0 ) ]
+}
+
+[sub_resource type="Animation" id=13]
+resource_name = "X"
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( 0, 0 ) ]
+}
+
+[sub_resource type="GDScript" id=14]
+script/source = "extends Control
+export var count = 10
+
+var c = 0
+
+
+func _process(delta):
+	if c < count:
+		c += 1
+		visible = true
+	else:
+		c = 0
+		visible = false
+"
+
+[sub_resource type="Animation" id=15]
+length = 2.0
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath("C0:breath")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 2 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ 0.6, 0.8, 0.9 ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("C1:breath")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.1, 2 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ 0.6, 0.8, 0.9 ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("C0/C2/BG:material:shader_param/textures:width")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0, 0.1 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 1,
+"values": [ 1805, 1080 ]
+}
+tracks/3/type = "value"
+tracks/3/path = NodePath("C0/C2/BG:material:shader_param/intensity")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/keys = {
+"times": PoolRealArray( 0, 1.4 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ 0.652, 0.948 ]
+}
+
+[sub_resource type="GDScript" id=16]
+script/source = "extends Control
+
+func _calc(tscale):
+	var texture = NoiseTexture.new()
+	texture.width =  OS.get_screen_size(0).x - 100
+	texture.height =1
+	texture.noise =  OpenSimplexNoise.new()
+	texture.noise.octaves = 1
+	texture.noise.period = 0.4
+	texture.noise.persistence = 1.5
+	texture.noise.lacunarity = 0.1
+	#texture.flags
+	print(texture.width)
+	$BG.material.set_shader_param(\"textures\",texture)
+	$R.material.set_shader_param(\"textures\",texture)
+	$G.material.set_shader_param(\"textures\",texture)
+	$B.material.set_shader_param(\"textures\",texture)
+
+var r = .8
+var g = .8
+var b = .8
+export var breath = 0.8
+func _process(delta):
+#	r = clamp(r+rand_range(-0.05,0.05),0.7,0.9)
+#	g = clamp(g+rand_range(-0.05,0.05),0.7,0.9)
+#	b = clamp(b+rand_range(-0.05,0.05),0.7,0.9)
+	r = breath + rand_range(-0.005,0.005)
+	g = breath + rand_range(-0.005,0.005)
+	b = breath + rand_range(-0.005,0.005)
+	
+	$BG.material.set_shader_param(\"intensity\",rand_range(0.9,0.91))
+	$R.material.set_shader_param(\"intensity\",r)
+	$B.material.set_shader_param(\"intensity\",b)
+	$G.material.set_shader_param(\"intensity\",g)
+	pass
+"
+
+[sub_resource type="Shader" id=17]
+code = "shader_type canvas_item;
+uniform sampler2D textures; 
+
+uniform vec4 chroma_key : source_color = vec4(1.0, 0.0, 1.0, 1.0);
+uniform float intensity : hint_range(0.0, 1.0) = 0.1;
+
+void fragment() {
+	vec4 tex_color = texture(textures, UV);
+	vec3 color_diff = abs(tex_color.rgb - chroma_key.rgb);
+	
+	float diff_magnitude = length(color_diff);
+	
+	if (diff_magnitude < intensity) {
+		discard;
+	}
+	
+	COLOR = tex_color;
+	COLOR.a =  texture(TEXTURE, UV).a * tex_color.a;
+}
+//
+//void fragment(){
+//	//COLOR = texture(TEXTURE, UV); //read from texture
+//	//COLOR = texture(,UV);
+//	COLOR = ProcessChromaKey(textures, UV);
+//	//COLOR.a = texture(TEXTURE, UV).a;
+//
+//}"
+
+[sub_resource type="ShaderMaterial" id=18]
+shader = SubResource( 17 )
+shader_param/chroma_key = Plane( 1.038, -0.267, 0.132, 1.14 )
+shader_param/intensity = 0.94
+
+[sub_resource type="ShaderMaterial" id=19]
+shader = SubResource( 17 )
+shader_param/chroma_key = Plane( 1.038, 0.081, 0.215, 1.14 )
+shader_param/intensity = 0.935
+
+[sub_resource type="OpenSimplexNoise" id=20]
+octaves = 1
+period = 0.1
+persistence = 0.0
+lacunarity = 0.1
+
+[sub_resource type="NoiseTexture" id=21]
+width = 1029
+height = 1
+noise = SubResource( 20 )
+
+[sub_resource type="ShaderMaterial" id=22]
+shader = SubResource( 17 )
+shader_param/chroma_key = Plane( 1.038, 0.099, 0.2, 2.196 )
+shader_param/intensity = 0.902
+shader_param/textures = SubResource( 21 )
+
+[sub_resource type="OpenSimplexNoise" id=23]
+octaves = 1
+period = 1.5
+persistence = 1.0
+lacunarity = 0.1
+
+[sub_resource type="NoiseTexture" id=24]
+width = 1920
+height = 1
+noise = SubResource( 23 )
+
+[sub_resource type="ShaderMaterial" id=25]
+shader = SubResource( 17 )
+shader_param/chroma_key = Plane( 1.038, 0.087, 0.256, 1.14 )
+shader_param/intensity = 0.853
+shader_param/textures = SubResource( 24 )
+
+[sub_resource type="Shader" id=26]
+code = "shader_type canvas_item;
+uniform sampler2D textures; 
+
+uniform vec4 chroma_key : source_color = vec4(1.0, 0.0, 1.0, 1.0);
+uniform float intensity : hint_range(0.0, 1.0) = 0.1;
+
+void fragment() {
+	vec4 tex_color = texture(textures, UV);
+	vec3 color_diff = abs(tex_color.rgb - chroma_key.rgb);
+	
+	float diff_magnitude = length(color_diff);
+	
+	if (diff_magnitude < intensity) {
+		discard;
+	}
+	
+	COLOR = tex_color;
+	COLOR.a =  texture(TEXTURE, UV).a * tex_color.a;
+}
+//
+//void fragment(){
+//	//COLOR = texture(TEXTURE, UV); //read from texture
+//	//COLOR = texture(,UV);
+//	COLOR = ProcessChromaKey(textures, UV);
+//	//COLOR.a = texture(TEXTURE, UV).a;
+//
+//}"
+
+[sub_resource type="OpenSimplexNoise" id=27]
+octaves = 1
+period = 0.1
+persistence = 0.0
+lacunarity = 0.1
+
+[sub_resource type="NoiseTexture" id=28]
+width = 1080
+height = 1
+noise = SubResource( 27 )
+
+[sub_resource type="ShaderMaterial" id=29]
+shader = SubResource( 26 )
+shader_param/chroma_key = Plane( 0.504, -0.112, 0.406, 1.14 )
+shader_param/intensity = 0.652
+shader_param/textures = SubResource( 28 )
+
+[sub_resource type="ShaderMaterial" id=30]
+shader = SubResource( 17 )
+shader_param/chroma_key = Plane( 0.97, -0.248, 0.132, 1.14 )
+shader_param/intensity = 0.995
+shader_param/textures = SubResource( 28 )
+
+[sub_resource type="ShaderMaterial" id=31]
+shader = SubResource( 17 )
+shader_param/chroma_key = Plane( 0.97, -0.267, 0.132, 1.14 )
+shader_param/intensity = 0.998
+shader_param/textures = SubResource( 28 )
+
+[sub_resource type="GDScript" id=32]
+script/source = "extends Control
+
+func _calc(tscale):
+	var texture = NoiseTexture.new()
+	texture.width = 2
+	texture.height = OS.get_screen_size(0).y - 100
+	texture.noise =  OpenSimplexNoise.new()
+	texture.noise.octaves = 1
+	texture.noise.period = 0.4
+	texture.noise.persistence = 1.5
+	texture.noise.lacunarity = 0.1
+	#texture.flags
+	print(texture.width)
+	$BG.material.set_shader_param(\"textures\",texture)
+	$R.material.set_shader_param(\"textures\",texture)
+	$G.material.set_shader_param(\"textures\",texture)
+	$B.material.set_shader_param(\"textures\",texture)
+
+var r = .8
+var g = .8
+var b = .8
+export var breath = 0.8
+func _process(delta):
+#	r = clamp(r+rand_range(-0.05,0.05),0.7,0.9)
+#	g = clamp(g+rand_range(-0.05,0.05),0.7,0.9)
+#	b = clamp(b+rand_range(-0.05,0.05),0.7,0.9)
+	r = breath + rand_range(-0.005,0.005)
+	g = breath + rand_range(-0.005,0.005)
+	b = breath + rand_range(-0.005,0.005)
+	
+	$BG.material.set_shader_param(\"intensity\",0.734)
+	$R.material.set_shader_param(\"intensity\",r)
+	$B.material.set_shader_param(\"intensity\",b)
+	$G.material.set_shader_param(\"intensity\",g)
+	pass
+"
+
+[sub_resource type="ShaderMaterial" id=33]
+shader = SubResource( 17 )
+shader_param/chroma_key = Plane( 1.038, 0.081, 0.215, 1.14 )
+shader_param/intensity = 0.935
+
+[sub_resource type="ShaderMaterial" id=34]
+shader = SubResource( 17 )
+shader_param/chroma_key = Plane( 1.038, 0.081, 0.215, 1.14 )
+shader_param/intensity = 0.935
+
+[sub_resource type="ShaderMaterial" id=35]
+shader = SubResource( 17 )
+shader_param/chroma_key = Plane( 1.038, 0.081, 0.215, 1.14 )
+shader_param/intensity = 0.935
+
+[sub_resource type="ShaderMaterial" id=36]
+shader = SubResource( 17 )
+shader_param/chroma_key = Plane( 1.038, 0.081, 0.215, 1.14 )
+shader_param/intensity = 0.935
+
+[sub_resource type="Animation" id=37]
+length = 40.0
+tracks/0/type = "value"
+tracks/0/path = NodePath("Scale/Shoot:color")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 1.1, 1.2, 11.7 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ),
+"update": 1,
+"values": [ Color( 1, 1, 1, 1 ), Color( 1, 0, 0, 1 ), Color( 0, 0, 0, 1 ), Color( 0, 0, 0, 0 ), Color( 0, 0, 0, 1 ), Color( 0, 0, 0, 0 ), Color( 0, 0, 0, 1 ), Color( 0, 0, 0, 1 ), Color( 0, 0, 0, 0 ), Color( 0, 0, 0, 1 ) ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("Shoot:playback_speed")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 1.3, 1.4 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ 5.0, 5.0, 1.0 ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("Scale/Splat:scale")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0, 1.4 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Vector2( 1e-05, 1e-05 ), Vector2( 1, 1 ) ]
+}
+tracks/3/type = "value"
+tracks/3/path = NodePath("Scale/Blood/Splat:scale")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/keys = {
+"times": PoolRealArray( 0, 1.3, 1.5 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Vector2( 0, 0 ), Vector2( 0.708882, -0.213224 ), Vector2( 2.33598, -2.88419 ) ]
+}
+tracks/4/type = "value"
+tracks/4/path = NodePath("Scale/Blood/TextureRect:rect_scale")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/keys = {
+"times": PoolRealArray( 0, 1.1, 8.4 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Vector2( 2.693, 0.026 ), Vector2( 2.69299, 2.22919 ), Vector2( 2.69297, 4.88701 ) ]
+}
+tracks/5/type = "value"
+tracks/5/path = NodePath("Scale/Splat/Blood:modulate")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/keys = {
+"times": PoolRealArray( 2.8, 7.8, 12.7 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 0.482353, 0, 0, 0 ), Color( 0.482353, 0, 0, 0.45098 ), Color( 0.482353, 0, 0, 0.45098 ) ]
+}
+tracks/6/type = "value"
+tracks/6/path = NodePath("Scale/Splat/Blood:rect_scale")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/keys = {
+"times": PoolRealArray( 2.9, 12.7 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Vector2( -1.069, -0.72 ), Vector2( -1.06929, -1.85893 ) ]
+}
+tracks/7/type = "value"
+tracks/7/path = NodePath("Buz:playing")
+tracks/7/interp = 1
+tracks/7/loop_wrap = true
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/keys = {
+"times": PoolRealArray( 11.7 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ false ]
+}
+tracks/8/type = "value"
+tracks/8/path = NodePath("..:over")
+tracks/8/interp = 1
+tracks/8/loop_wrap = true
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/keys = {
+"times": PoolRealArray( 0, 13.5 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 1,
+"values": [ false, true ]
+}
+
+[node name="FK" type="Control"]
+margin_left = 317.027
+margin_top = 272.0
+margin_right = 317.027
+margin_bottom = 272.0
+script = SubResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+over = null
+
+[node name="Cen" type="Node2D" parent="."]
+
+[node name="Anim" type="Node2D" parent="Cen"]
+scale = Vector2( 1.0248, 1.0248 )
+
+[node name="RichTextLabel" type="RichTextLabel" parent="Cen/Anim"]
+modulate = Color( 1, 1, 1, 0.0100258 )
+margin_left = -868.182
+margin_top = -762.998
+margin_right = -563.182
+margin_bottom = -511.998
+rect_scale = Vector2( 5.89086, 5.89086 )
+mouse_filter = 2
+custom_fonts/normal_font = SubResource( 2 )
+custom_colors/default_color = Color( 0, 0, 0, 1 )
+bbcode_enabled = true
+bbcode_text = "[tornado][center][shake][wave]Who would you rather kill?
+Who would you rather kill?
+Who would you rather kill?
+Who would you rather kill?
+Who would you rather kill?
+Who would you rather kill?
+Who would you rather kill?
+Who would you rather kill?
+Who would you rather kill?
+
+
+
+
+
+
+"
+meta_underlined = false
+text = "Who would you rather kill?
+Who would you rather kill?
+Who would you rather kill?
+Who would you rather kill?
+Who would you rather kill?
+Who would you rather kill?
+Who would you rather kill?
+Who would you rather kill?
+Who would you rather kill?
+
+
+
+
+
+
+"
+scroll_active = false
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="F1" type="Node2D" parent="Cen/Anim"]
+position = Vector2( -115.918, 2 )
+scale = Vector2( 1.5, 1.5 )
+
+[node name="Icon" type="TextureRect" parent="Cen/Anim/F1"]
+margin_left = -60.8237
+margin_top = -63.7517
+margin_right = 3.17627
+margin_bottom = 0.24826
+rect_scale = Vector2( 2, 2 )
+texture = ExtResource( 15 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Border" type="TextureRect" parent="Cen/Anim/F1"]
+visible = false
+margin_left = -76.5414
+margin_top = -74.3021
+margin_right = -47.5414
+margin_bottom = -45.3021
+rect_scale = Vector2( 5.3, 5.3 )
+texture = ExtResource( 11 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="text" type="RichTextLabel" parent="Cen/Anim/F1"]
+modulate = Color( 0, 0, 0, 1 )
+margin_left = -78.0
+margin_top = 65.0
+margin_right = 31.0
+margin_bottom = 108.0
+rect_scale = Vector2( 1.42871, 1.42871 )
+custom_fonts/normal_font = SubResource( 3 )
+custom_colors/default_color = Color( 1, 1, 1, 1 )
+bbcode_enabled = true
+bbcode_text = "[center]
+
+"
+meta_underlined = false
+text = "
+
+"
+scroll_active = false
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="F2" type="Node2D" parent="Cen/Anim"]
+position = Vector2( 118.677, 2 )
+scale = Vector2( 1.5, 1.5 )
+
+[node name="Icon" type="TextureRect" parent="Cen/Anim/F2"]
+margin_left = -60.8237
+margin_top = -63.7517
+margin_right = 3.17627
+margin_bottom = 0.24826
+rect_scale = Vector2( 2, 2 )
+texture = ExtResource( 15 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Border" type="TextureRect" parent="Cen/Anim/F2"]
+visible = false
+margin_left = -76.5414
+margin_top = -74.3021
+margin_right = -47.5414
+margin_bottom = -45.3021
+rect_scale = Vector2( 5.3, 5.3 )
+texture = ExtResource( 11 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="text" type="RichTextLabel" parent="Cen/Anim/F2"]
+modulate = Color( 0, 0, 0, 1 )
+margin_left = -79.0
+margin_top = 64.0
+margin_right = 32.0
+margin_bottom = 108.0
+rect_scale = Vector2( 1.42871, 1.42871 )
+custom_fonts/normal_font = SubResource( 3 )
+custom_colors/default_color = Color( 1, 1, 1, 1 )
+bbcode_enabled = true
+bbcode_text = "[center]
+
+"
+meta_underlined = false
+text = "
+
+"
+scroll_active = false
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Sel" type="AnimationPlayer" parent="Cen/Anim"]
+anims/L = SubResource( 4 )
+anims/R = SubResource( 5 )
+anims/X = SubResource( 6 )
+
+[node name="Selc" type="Node2D" parent="Cen/Anim"]
+modulate = Color( 1, 1, 1, 0 )
+position = Vector2( 135, 100.52 )
+
+[node name="FF" type="Sprite" parent="Cen/Anim/Selc"]
+modulate = Color( 0.647059, 0.635294, 0.517647, 1 )
+position = Vector2( 0, -2.14767 )
+scale = Vector2( 1.63233, 1.63233 )
+texture = ExtResource( 4 )
+
+[node name="select" type="AudioStreamPlayer" parent="Cen/Anim/Selc"]
+stream = ExtResource( 40 )
+volume_db = -10.0
+pitch_scale = 0.4
+
+[node name="L" type="Button" parent="Cen/Anim"]
+modulate = Color( 1, 1, 1, 0 )
+margin_left = -207.0
+margin_top = -94.0
+margin_right = -15.0
+margin_bottom = 107.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="R" type="Button" parent="Cen/Anim"]
+modulate = Color( 1, 1, 1, 0 )
+margin_left = 27.0
+margin_top = -93.0
+margin_right = 202.0
+margin_bottom = 101.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="dryfire" type="AudioStreamPlayer" parent="Cen/Anim"]
+stream = ExtResource( 9 )
+volume_db = -15.0
+pitch_scale = 0.9
+
+[node name="clock" type="AudioStreamPlayer" parent="Cen/Anim"]
+stream = ExtResource( 38 )
+pitch_scale = 0.4
+
+[node name="bock" type="AudioStreamPlayer" parent="Cen/Anim"]
+stream = ExtResource( 40 )
+pitch_scale = 0.4
+
+[node name="or" type="AudioStreamPlayer" parent="Cen/Anim"]
+stream = ExtResource( 7 )
+
+[node name="OR" type="RichTextLabel" parent="Cen/Anim"]
+visible = false
+self_modulate = Color( 0, 0, 0, 1 )
+margin_left = -268.705
+margin_top = -87.6734
+margin_right = -203.705
+margin_bottom = -58.6734
+rect_scale = Vector2( 8.28888, 8.28888 )
+custom_fonts/normal_font = SubResource( 3 )
+custom_colors/default_color = Color( 1, 1, 1, 1 )
+bbcode_enabled = true
+bbcode_text = "[center]OR
+
+
+"
+meta_underlined = false
+text = "OR
+
+
+"
+scroll_active = false
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="OR2" type="RichTextLabel" parent="Cen/Anim/OR"]
+margin_left = 0.000434875
+margin_top = -0.64274
+margin_right = 67.0004
+margin_bottom = 22.3573
+custom_fonts/normal_font = SubResource( 3 )
+custom_colors/default_color = Color( 1, 1, 1, 1 )
+bbcode_enabled = true
+bbcode_text = "[center]OR
+
+
+"
+meta_underlined = false
+text = "OR
+
+
+"
+scroll_active = false
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="BackBufferCopy" type="BackBufferCopy" parent="Cen/Anim"]
+copy_mode = 2
+
+[node name="ColorRect" type="ColorRect" parent="Cen/Anim/BackBufferCopy"]
+material = SubResource( 8 )
+margin_left = -233.0
+margin_top = -109.0
+margin_right = 238.0
+margin_bottom = 121.0
+mouse_filter = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="BackBufferCopy2" type="BackBufferCopy" parent="Cen/Anim"]
+visible = false
+copy_mode = 2
+
+[node name="ColorRect" type="ColorRect" parent="Cen/Anim/BackBufferCopy2"]
+visible = false
+material = SubResource( 10 )
+margin_left = -20544.0
+margin_top = -12807.0
+margin_right = 17776.0
+margin_bottom = 13388.0
+mouse_filter = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Dream" type="AnimationPlayer" parent="Cen/Anim"]
+autoplay = "!New"
+anims/!New = SubResource( 11 )
+anims/SEQ = SubResource( 12 )
+anims/X = SubResource( 13 )
+
+[node name="Point" type="Node2D" parent="."]
+visible = false
+
+[node name="Scale" type="Node2D" parent="Point"]
+
+[node name="Blood" type="Node2D" parent="Point/Scale"]
+scale = Vector2( 0.38376, 0.38376 )
+
+[node name="TextureRect" type="TextureRect" parent="Point/Scale/Blood"]
+modulate = Color( 0.482353, 0, 0, 1 )
+margin_left = -365.785
+margin_top = -323.293
+margin_right = -192.785
+margin_bottom = -67.2928
+rect_rotation = 0.284885
+rect_scale = Vector2( 2.693, 0.026 )
+texture = ExtResource( 3 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Splat" type="Node2D" parent="Point/Scale/Blood"]
+position = Vector2( 0.441223, -3.04114 )
+rotation = 3.14159
+scale = Vector2( 1e-05, 1e-05 )
+
+[node name="TextureRect2" type="TextureRect" parent="Point/Scale/Blood/Splat"]
+modulate = Color( 0.882353, 0, 0, 1 )
+margin_left = -35.2976
+margin_top = -131.578
+margin_right = 122.702
+margin_bottom = -1.57806
+rect_rotation = -1.36225
+rect_scale = Vector2( 1.53787, 1.25673 )
+texture = ExtResource( 6 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Shader" type="Control" parent="Point/Scale"]
+margin_left = -368.164
+margin_top = -539.173
+margin_right = -328.164
+margin_bottom = -499.173
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="F2" type="Control" parent="Point/Scale/Shader"]
+modulate = Color( 1, 1, 1, 0.137255 )
+margin_left = 876.246
+margin_top = 1060.38
+margin_right = 916.246
+margin_bottom = 1100.38
+rect_rotation = -180.0
+script = SubResource( 14 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+count = 2
+
+[node name="Flash1" type="TextureRect" parent="Point/Scale/Shader/F2"]
+margin_left = -323.477
+margin_top = 68.0216
+margin_right = 614.523
+margin_bottom = 556.022
+rect_scale = Vector2( 2, 2 )
+texture = ExtResource( 5 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorRect" type="ColorRect" parent="Point/Scale/Shader/F2"]
+margin_left = -7944.78
+margin_top = 1044.26
+margin_right = 9013.22
+margin_bottom = 5391.26
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorRect2" type="ColorRect" parent="Point/Scale/Shader/F2"]
+margin_left = -7947.06
+margin_top = 718.84
+margin_right = -323.061
+margin_bottom = 1043.84
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorRect3" type="ColorRect" parent="Point/Scale/Shader/F2"]
+margin_left = 1553.24
+margin_top = 106.623
+margin_right = 9177.24
+margin_bottom = 1043.62
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="F1" type="Control" parent="Point/Scale/Shader"]
+modulate = Color( 0, 0, 0, 1 )
+margin_right = 40.0
+margin_bottom = 40.0
+script = SubResource( 14 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+count = 20
+
+[node name="Flash1" type="TextureRect" parent="Point/Scale/Shader/F1"]
+margin_left = -323.477
+margin_top = 68.0216
+margin_right = 614.523
+margin_bottom = 556.022
+rect_scale = Vector2( 2, 2 )
+texture = ExtResource( 5 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorRect" type="ColorRect" parent="Point/Scale/Shader/F1"]
+margin_left = -7943.44
+margin_top = 1038.02
+margin_right = 9014.56
+margin_bottom = 5385.02
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorRect2" type="ColorRect" parent="Point/Scale/Shader/F1"]
+margin_left = -7943.44
+margin_top = 720.873
+margin_right = -319.437
+margin_bottom = 1045.87
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorRect3" type="ColorRect" parent="Point/Scale/Shader/F1"]
+margin_left = 1536.49
+margin_top = 108.873
+margin_right = 9160.49
+margin_bottom = 1045.87
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Point/Scale/Shader"]
+autoplay = "0"
+playback_speed = 0.05
+anims/0 = SubResource( 15 )
+
+[node name="C0" type="Control" parent="Point/Scale/Shader"]
+margin_right = 40.0
+margin_bottom = 40.0
+script = SubResource( 16 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+breath = 0.9
+
+[node name="BG" type="TextureRect" parent="Point/Scale/Shader/C0"]
+modulate = Color( 0, 0, 0, 1 )
+material = SubResource( 18 )
+margin_right = 1250.0
+margin_bottom = 833.0
+texture = ExtResource( 13 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="G" type="TextureRect" parent="Point/Scale/Shader/C0"]
+modulate = Color( 0, 1, 0, 1 )
+material = SubResource( 19 )
+margin_right = 1250.0
+margin_bottom = 833.0
+texture = ExtResource( 13 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="B" type="TextureRect" parent="Point/Scale/Shader/C0"]
+modulate = Color( 0, 0, 1, 1 )
+material = SubResource( 22 )
+margin_right = 1250.0
+margin_bottom = 833.0
+texture = ExtResource( 13 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="R" type="TextureRect" parent="Point/Scale/Shader/C0"]
+modulate = Color( 1, 0, 0, 1 )
+material = SubResource( 25 )
+margin_right = 1250.0
+margin_bottom = 833.0
+texture = ExtResource( 13 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="C2" type="Control" parent="Point/Scale/Shader/C0"]
+margin_right = 40.0
+margin_bottom = 40.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="BG" type="ColorRect" parent="Point/Scale/Shader/C0/C2"]
+modulate = Color( 0, 0, 0, 1 )
+material = SubResource( 29 )
+margin_left = 48.0
+margin_top = 186.0
+margin_right = 138.0
+margin_bottom = 6194.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="R" type="ColorRect" parent="Point/Scale/Shader/C0/C2"]
+modulate = Color( 1, 0, 0, 1 )
+material = SubResource( 29 )
+margin_left = 49.0285
+margin_top = 185.844
+margin_right = 139.029
+margin_bottom = 6185.84
+rect_pivot_offset = Vector2( 1227.94, 454.604 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="G" type="ColorRect" parent="Point/Scale/Shader/C0/C2"]
+modulate = Color( 0, 1, 0, 1 )
+material = SubResource( 30 )
+margin_left = 51.316
+margin_top = 185.943
+margin_right = 141.316
+margin_bottom = 6185.94
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="B" type="ColorRect" parent="Point/Scale/Shader/C0/C2"]
+modulate = Color( 0, 0, 1, 1 )
+material = SubResource( 31 )
+margin_left = 48.1376
+margin_top = 185.943
+margin_right = 138.138
+margin_bottom = 6185.94
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="C1" type="Control" parent="Point/Scale/Shader"]
+margin_right = 40.0
+margin_bottom = 40.0
+script = SubResource( 32 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+breath = 0.9
+
+[node name="BG" type="TextureRect" parent="Point/Scale/Shader/C1"]
+modulate = Color( 0, 0, 0, 1 )
+material = SubResource( 33 )
+margin_left = 370.417
+margin_top = 39.0576
+margin_right = 1620.42
+margin_bottom = 872.058
+texture = ExtResource( 10 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="G" type="TextureRect" parent="Point/Scale/Shader/C1"]
+modulate = Color( 0, 1, 0, 1 )
+material = SubResource( 34 )
+margin_left = 370.417
+margin_top = 39.0576
+margin_right = 1620.42
+margin_bottom = 872.058
+texture = ExtResource( 10 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="B" type="TextureRect" parent="Point/Scale/Shader/C1"]
+modulate = Color( 0, 0, 1, 1 )
+material = SubResource( 35 )
+margin_left = 370.417
+margin_top = 39.0576
+margin_right = 1620.42
+margin_bottom = 872.058
+texture = ExtResource( 10 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="R" type="TextureRect" parent="Point/Scale/Shader/C1"]
+modulate = Color( 1, 0, 0, 1 )
+material = SubResource( 36 )
+margin_left = 370.417
+margin_top = 39.0576
+margin_right = 1620.42
+margin_bottom = 872.058
+texture = ExtResource( 10 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Splat" type="Node2D" parent="Point/Scale"]
+position = Vector2( 1.70708, 4.43004 )
+rotation = 3.14159
+scale = Vector2( 1e-05, 1e-05 )
+
+[node name="TextureRect4" type="TextureRect" parent="Point/Scale/Splat"]
+modulate = Color( 0.482353, 0, 0, 1 )
+margin_left = 149.153
+margin_top = -149.123
+margin_right = 470.153
+margin_bottom = 148.877
+rect_scale = Vector2( -0.980691, 1.00481 )
+texture = ExtResource( 14 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Blood" type="TextureRect" parent="Point/Scale/Splat"]
+modulate = Color( 0.482353, 0, 0, 0.432941 )
+margin_left = 95.5477
+margin_top = 94.3114
+margin_right = 268.548
+margin_bottom = 350.311
+rect_rotation = 0.284885
+rect_scale = Vector2( -1.06914, -1.26622 )
+texture = ExtResource( 3 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="TextureRect3" type="TextureRect" parent="Point/Scale"]
+modulate = Color( 0, 0, 0, 0.356863 )
+margin_left = -368.164
+margin_top = -536.928
+margin_right = 881.836
+margin_bottom = 296.072
+texture = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="TextureRect2" type="TextureRect" parent="Point/Scale"]
+margin_left = -368.164
+margin_top = -539.173
+margin_right = 881.836
+margin_bottom = 293.827
+texture = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Shoot" type="ColorRect" parent="Point/Scale"]
+margin_left = -9119.0
+margin_top = -4888.0
+margin_right = 8646.0
+margin_bottom = 4846.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Buz" type="AudioStreamPlayer" parent="Point"]
+stream = ExtResource( 8 )
+volume_db = -30.0
+
+[node name="gun" type="AudioStreamPlayer" parent="Point"]
+stream = ExtResource( 2 )
+
+[node name="ham" type="AudioStreamPlayer" parent="Point"]
+stream = ExtResource( 12 )
+volume_db = -15.0
+autoplay = true
+
+[node name="Shoot" type="AnimationPlayer" parent="Point"]
+playback_speed = 5.0
+anims/gun = SubResource( 37 )
+
+[connection signal="mouse_entered" from="Cen/Anim/L" to="." method="_on_L_mouse_entered"]
+[connection signal="mouse_exited" from="Cen/Anim/L" to="." method="_on_L_mouse_exited"]
+[connection signal="mouse_entered" from="Cen/Anim/R" to="." method="_on_R_mouse_entered"]
+[connection signal="mouse_exited" from="Cen/Anim/R" to="." method="_on_R_mouse_exited"]

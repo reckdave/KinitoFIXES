@@ -1,0 +1,176 @@
+[gd_scene load_steps=8 format=2]
+
+[ext_resource path="res://KinitoFIXES/-Scenes/NewCMD/CMD-TEXT-FONT.tres" type="DynamicFont" id=1]
+[ext_resource path="res://KinitoFIXES/-Scenes/NewCMD/CMD-TEXT.tscn" type="PackedScene" id=2]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends Node2D
+
+onready var cmd_line = preload(\"res://KinitoFIXES/-Scenes/NewCMD/CMD-LINE.tscn\")
+onready var cmd_text = preload(\"res://KinitoFIXES/-Scenes/NewCMD/CMD-TEXT.tscn\")
+var fixes_node
+
+var Grant := false
+var Delete := false
+
+func _ready():
+	$Animation.play(\"0\")
+	create_line()
+
+
+func create_line():
+	var clone = cmd_line.instance()
+	clone.cmd_node = self
+	$Active/Scroll/List.add_child(clone)
+func create_text(text):
+	var clone = cmd_text.instance()
+	clone.text = text
+	$Active/Scroll/List.add_child(clone)
+"
+
+[sub_resource type="GDScript" id=2]
+script/source = "extends Button
+
+var pos = Vector2()
+var mousePos = Vector2()
+var selected = false
+func _process(delta):
+	mousePos = get_viewport().get_mouse_position()
+	if selected == true:
+		 get_parent().get_parent().position = mousePos - pos
+
+func _button_down():
+	pos = get_viewport().get_mouse_position() - get_parent().get_parent().position
+	selected = true
+
+func _button_up():
+	selected = false
+"
+
+[sub_resource type="Animation" id=3]
+length = 0.3
+tracks/0/type = "value"
+tracks/0/path = NodePath("Active:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.3 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 1 ) ]
+}
+
+[sub_resource type="Animation" id=4]
+length = 0.3
+tracks/0/type = "value"
+tracks/0/path = NodePath("Active:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.3 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 0 ) ]
+}
+
+[sub_resource type="Animation" id=5]
+resource_name = "Shake"
+length = 11.0
+
+[node name="CMD-FIXES" type="Node2D"]
+script = SubResource( 1 )
+
+[node name="Active" type="Control" parent="."]
+margin_right = 490.0
+margin_bottom = 290.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="BG" type="ColorRect" parent="Active"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color( 0.121569, 0.121569, 0.121569, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="TitleBAR" type="ColorRect" parent="Active"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_bottom = -270.0
+color = Color( 0.164706, 0.164706, 0.164706, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="TitleText" type="Label" parent="Active"]
+margin_right = 470.0
+margin_bottom = 20.0
+custom_fonts/font = ExtResource( 1 )
+text = "COMMAND PROMPT"
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="XText" type="Label" parent="Active"]
+margin_left = 470.0
+margin_right = 490.0
+margin_bottom = 20.0
+custom_fonts/font = ExtResource( 1 )
+text = "X"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="TabButton" type="Button" parent="Active"]
+modulate = Color( 1, 1, 1, 0 )
+margin_right = 470.0
+margin_bottom = 20.0
+script = SubResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Scroll" type="ScrollContainer" parent="Active"]
+margin_top = 20.0
+margin_right = 490.0
+margin_bottom = 290.0
+follow_focus = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="List" type="VBoxContainer" parent="Active/Scroll"]
+margin_bottom = 60.0
+custom_constants/separation = 20
+
+[node name="Start1" parent="Active/Scroll/List" instance=ExtResource( 2 )]
+margin_right = 0.0
+margin_bottom = 0.0
+text = "Microsoft Windows [Version 10.0.x.x]"
+
+[node name="Start2" parent="Active/Scroll/List" instance=ExtResource( 2 )]
+margin_top = 20.0
+margin_right = 0.0
+text = "(c) Microsoft Corporation. All rights reserved."
+
+[node name="Start3" parent="Active/Scroll/List" instance=ExtResource( 2 )]
+margin_top = 40.0
+margin_right = 0.0
+margin_bottom = 40.0
+
+[node name="Animation" type="AnimationPlayer" parent="."]
+anims/0 = SubResource( 3 )
+anims/1 = SubResource( 4 )
+anims/Shake = SubResource( 5 )
+
+[connection signal="button_down" from="Active/TabButton" to="Active/TabButton" method="_button_down"]
+[connection signal="button_up" from="Active/TabButton" to="Active/TabButton" method="_button_up"]

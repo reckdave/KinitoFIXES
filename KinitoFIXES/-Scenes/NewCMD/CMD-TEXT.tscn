@@ -1,0 +1,38 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://KinitoFIXES/-Scenes/NewCMD/CMD-TEXT-FONT.tres" type="DynamicFont" id=1]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends Control
+
+export var text := \"\"
+func _ready():
+	$Label.text = text
+"
+
+[node name="TEXT" type="Control"]
+margin_right = 490.0
+margin_bottom = 20.0
+script = SubResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="BG" type="ColorRect" parent="."]
+margin_right = 490.0
+margin_bottom = 20.0
+color = Color( 0.121569, 0.121569, 0.121569, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="."]
+margin_left = 10.0
+margin_right = 490.0
+margin_bottom = 20.0
+custom_fonts/font = ExtResource( 1 )
+text = "TEXT"
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}

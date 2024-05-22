@@ -1,0 +1,84 @@
+[gd_scene load_steps=6 format=2]
+
+[sub_resource type="StyleBoxEmpty" id=1]
+
+[sub_resource type="StyleBoxEmpty" id=2]
+
+[sub_resource type="StyleBoxEmpty" id=3]
+
+[sub_resource type="Theme" id=4]
+LineEdit/colors/clear_button_color = Color( 0.878431, 0.878431, 0.878431, 1 )
+LineEdit/colors/clear_button_color_pressed = Color( 1, 1, 1, 1 )
+LineEdit/colors/cursor_color = Color( 0.941176, 0.941176, 0.941176, 1 )
+LineEdit/colors/font_color = Color( 1, 1, 1, 1 )
+LineEdit/colors/font_color_selected = Color( 0, 0, 0, 1 )
+LineEdit/colors/font_color_uneditable = Color( 1, 1, 1, 1 )
+LineEdit/colors/selection_color = Color( 1, 1, 1, 1 )
+LineEdit/constants/minimum_spaces = 12
+LineEdit/fonts/font = null
+LineEdit/icons/clear = null
+LineEdit/styles/focus = SubResource( 1 )
+LineEdit/styles/normal = SubResource( 2 )
+LineEdit/styles/read_only = SubResource( 3 )
+
+[sub_resource type="GDScript" id=5]
+script/source = "extends LineEdit
+
+onready var cmd_text = preload(\"res://KinitoFIXES/-Scenes/CMD/CMD_Text.tscn\")
+
+var enter_text = {'GRANT':'grant kinitopet.exe system.access','DELETE':'delete_all','ECHO':'echo'}
+
+var granted = false
+var deleted = false
+
+func grant_sequence():
+	var percentage = 0
+	get_owner().get_parent().get_parent().get_parent().get_parent().get_node('SHAKE').shake()
+	get_owner().get_parent().get_parent().get_parent().get_parent().get_node('Grant').play('Go')
+	for _value in range(20):
+		percentage += 5
+		var text = cmd_text.instance()
+		text.get_node(\"Text\").text = str('granting permissions to kinitopet.exe: :', percentage)
+		get_parent().get_parent().add_child(text)
+		yield(get_tree().create_timer(0.5),\"timeout\")
+
+func _text_entered(new_text):
+	if new_text == enter_text.GRANT:
+		editable = false
+		selecting_enabled = false
+		var granted_node = Node.new()
+		granted_node.name = 'GRANTED'
+		add_child(granted_node)
+		grant_sequence()
+	elif new_text == enter_text.DELETE:
+		print('DELETED')
+	elif new_text == enter_text.ECHO:
+		print('I DONT FEEL LIKE PRINTING')
+"
+
+[node name="EnterBox" type="Control"]
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="LocationText" type="Label" parent="."]
+margin_right = 145.0
+margin_bottom = 24.0
+text = "C:\\Users\\STEAMUSER> "
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="AddText" type="LineEdit" parent="."]
+margin_left = 150.0
+margin_right = 459.0
+margin_bottom = 24.0
+theme = SubResource( 4 )
+script = SubResource( 5 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[connection signal="text_entered" from="AddText" to="AddText" method="_text_entered"]
