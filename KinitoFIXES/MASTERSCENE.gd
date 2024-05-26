@@ -3,7 +3,7 @@ extends Node2D
 onready var kinitoscene = preload("res://KinitoFIXES/Scenes/App001/1.tscn")
 onready var CMD_SCENE = preload("res://KinitoFIXES/Scenes/NewCMD/CMD-FIXES.tscn")
 onready var log_main = preload("res://KinitoFIXES/Scenes/LOG_MAIN.tscn")
-onready var log_box = $CanvasLayer/GUI/LOG_BOX
+onready var log_box = $GUI/Active/LOG_BOX
 
 var kintiopatch = false
 
@@ -56,11 +56,11 @@ func _ready():
 	version_check()
 	yield(ConfigHandler(),"completed")
 	print_log('CONFIG FOUND')
-	#$GUI.visible = config_info['GUI_VISIBLE']
+	$GUI/Active.visible = config_info["GUI_VISIBLE"]
 
 # UPDATE CHECK
 const version_url = "https://raw.githubusercontent.com/reckdave/KinitoFIXES/main/KinitoFIXES/Files/VERSION.json"
-const version = "1.0.0"
+const version = "1.0.1"
 
 func version_check():
 	$VersionRequest.request(version_url)
