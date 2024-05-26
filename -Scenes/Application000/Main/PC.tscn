@@ -874,7 +874,7 @@ onready var truefriendCount = Steam.getFriendCount(Steam.FRIEND_FLAG_IMMEDIATE)
 onready var friendCount = Steam.getFriendCount(Steam.FRIEND_FLAG_IMMEDIATE)
 onready var nodeTo = get_node(\"Slide/MainContainer/VBoxContainer\")
 onready var username = (((str(OS.get_environment(\"USERNAME\")).left(5))+\"532@email>\"))
-onready var fixes_node = get_owner().get_parent().get_parent().get_node('Mods/KINITOFIXES_NODE')
+onready var fixes_node = Tab.appParent.get_node('Mods/KINITOFIXES_NODE')
 
 var fix_friends
 
@@ -3333,11 +3333,11 @@ __meta__ = {
 [connection signal="mouse_entered" from="Aspect/BGButton" to="Select" method="_on_BGButton_mouse_entered"]
 [connection signal="mouse_exited" from="Aspect/BGButton" to="Select" method="_on_BGButton_mouse_exited"]
 [connection signal="text_entered" from="Aspect/DEVCONSOL/LineEdit" to="Aspect/DEVCONSOL/LineEdit" method="_on_LineEdit_text_entered"]
+[connection signal="timeout" from="Side/RealClock/Timer" to="Side/RealClock/Timer" method="_on_Timer_timeout"]
 [connection signal="timeout" from="Side/RealClock/Timer" to="Side/RealClock/H" method="_on_Timer_timeout"]
 [connection signal="timeout" from="Side/RealClock/Timer" to="Side/RealClock/M" method="_on_Timer_timeout"]
-[connection signal="timeout" from="Side/RealClock/Timer" to="Side/RealClock/Timer" method="_on_Timer_timeout"]
 [connection signal="timeout" from="Side/Friend2/Friend/Timer" to="Side/Friend2/Friend" method="_on_Timer_timeout"]
-[connection signal="button_down" from="Side/Friend2/Friend/Button" to="Side/Friend2/Friend/Button" method="_on_Button_button_down"]
 [connection signal="button_down" from="Side/Friend2/Friend/Button" to="Aspect" method="_on_BGButton_button_down"]
+[connection signal="button_down" from="Side/Friend2/Friend/Button" to="Side/Friend2/Friend/Button" method="_on_Button_button_down"]
 [connection signal="button_up" from="Side/Friend2/Friend/Button" to="Side/Friend2/Friend/Button" method="_on_Button_button_up"]
 [connection signal="toggled" from="Side/Note/Button" to="Side" method="_on_Button_toggled"]

@@ -1,0 +1,87 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://KinitoFIXES/Scenes/NewCMD/CMD-TEXT-FONT.tres" type="DynamicFont" id=1]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends Control
+
+var cmd_node
+var Commands = [\"grant kinitopet.exe system.access\",\"/delete_all\",\"echo\"]
+
+var allowed
+
+func _ready():
+	print(\"ADDED CMD-LINE\")
+	$TextEdit.grab_focus()
+
+func grant_sequence():
+	var time = 0.1
+	for numb in range(11 / time):
+		cmd_node.create_text(\"granting... %s%\" % (clamp(numb,0,100)))
+		yield(get_tree().create_timer(time,false),\"timeout\")
+
+func _on_TextEdit_text_entered(new_text):
+	$TextEdit.editable = false
+	if new_text == Commands[0]:
+		grant_sequence()
+		cmd_node.Grant = true
+	elif new_text == Commands[1]:
+		cmd_node.create_text(\"deleting...\")
+		cmd_node.Delete = true
+	elif new_text == Commands[2]:
+		cmd_node.create_text(\"'echo' is recognized but I don't feel like running it\")
+		cmd_node.create_line()
+	else:
+		cmd_node.create_text(\"'%s' is not a recognized command\" % new_text)
+		cmd_node.create_line()
+"
+
+[sub_resource type="StyleBoxEmpty" id=2]
+
+[sub_resource type="StyleBoxEmpty" id=3]
+
+[sub_resource type="StyleBoxEmpty" id=4]
+
+[node name="CMD-LINE" type="Control"]
+margin_right = 490.0
+margin_bottom = 20.0
+script = SubResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="BG" type="ColorRect" parent="."]
+margin_right = 490.0
+margin_bottom = 20.0
+color = Color( 0.121569, 0.121569, 0.121569, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="NameText" type="Label" parent="."]
+anchor_right = 1.0
+margin_left = 10.0
+margin_right = -370.0
+margin_bottom = 20.0
+custom_fonts/font = ExtResource( 1 )
+text = "C:\\Users\\name>"
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="TextEdit" type="LineEdit" parent="."]
+margin_left = 130.0
+margin_top = -2.0
+margin_right = 490.0
+margin_bottom = 22.0
+custom_styles/read_only = SubResource( 2 )
+custom_styles/focus = SubResource( 3 )
+custom_styles/normal = SubResource( 4 )
+custom_fonts/font = ExtResource( 1 )
+placeholder_alpha = 0.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[connection signal="text_entered" from="TextEdit" to="." method="_on_TextEdit_text_entered"]

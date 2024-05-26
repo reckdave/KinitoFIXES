@@ -9740,7 +9740,7 @@ tracks/6/keys = {
 [sub_resource type="GDScript" id=93]
 script/source = "extends Control
 export var prompt = \"spiders\"  # Replace with your desired prompt
-onready var Fixes_Node = get_owner().get_parent().get_parent().get_node(\"Mods/KINITOFIXES_NODE\")
+onready var Fixes_Node = Tab.appParent.get_node(\"Mods/KINITOFIXES_NODE\")
 
 var send_request
 

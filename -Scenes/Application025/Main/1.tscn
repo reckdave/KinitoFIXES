@@ -57,7 +57,7 @@ func _id_to_image(steam_id):
 	var AVATAR: Image = Image.new()
 	var AVATAR_TEXTURE: ImageTexture = ImageTexture.new()
 	if IMAGE['width'] <= 0:
-		return
+		return load(\"res://-Asset/!ENGINE_TODELETE/example.png\")
 	AVATAR.create(IMAGE['width'], IMAGE['height'], false, Image.FORMAT_RGBAF)
 	var size = 64
 	AVATAR.lock()

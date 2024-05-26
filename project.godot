@@ -13,7 +13,7 @@ config_version=4
 config/name="KinitoFIXES"
 config/description="A MOD FOR KINITO TO FIX BUGS!"
 run/main_scene="res://KinitoFIXES/MASTERSCENE.tscn"
-config/icon="res://KinitoFIXES/-Assets/icon.png"
+config/icon="res://KinitoFIXES/Assets/icon.png"
 
 [display]
 
@@ -23,6 +23,7 @@ window/size/height=1080
 [global]
 
 linear=false
+crash=false
 
 [physics]
 
