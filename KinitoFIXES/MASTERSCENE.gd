@@ -60,7 +60,7 @@ func _ready():
 
 # UPDATE CHECK
 const version_url = "https://raw.githubusercontent.com/reckdave/KinitoFIXES/main/KinitoFIXES/Files/VERSION.json"
-const version = "1.0.1"
+const version = "1.0.2"
 
 func version_check():
 	$VersionRequest.request(version_url)
@@ -70,7 +70,7 @@ func _request_completed(result, response_code, headers, body):
 		var data = str2var(body.get_string_from_utf8())
 		print_log(data["VERSION"])
 		if version < data["VERSION"]:
-			OS.alert("THIS IS AN OUTDATED VERSION OF MODCONFIG \nDOWNLOAD LATEST AT THE GITHUB","KINITOFIXES")
+			OS.alert("THIS IS AN OUTDATED VERSION OF KINITOFIXES \nDOWNLOAD LATEST AT THE GITHUB","KINITOFIXES")
 			OS.shell_open("https://github.com/reckdave/KinitoFIXES/releases/tag/release%s" % data["VERSION"])
 	else:
 		print_log('FAILED TO GET VERSION NUMBER: ' + response_code)
