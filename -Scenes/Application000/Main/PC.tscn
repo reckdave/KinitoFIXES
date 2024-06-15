@@ -93,7 +93,13 @@ func _ready():
 [sub_resource type="GDScript" id=4]
 script/source = "extends Control
 var done = false
+onready var fixes_node = Tab.appParent.get_node('Mods/KINITOFIXES_NODE')
+var transparent
 func _ready():
+	transparent = fixes_node.config_info[\"TRANSPARENT_DSK\"]
+	fixes_node.print_log(transparent)
+	if transparent == true:
+		hide()
 	if(Settings.settings.CustomBackground == true):
 		done = true
 		_do()
@@ -876,10 +882,9 @@ onready var nodeTo = get_node(\"Slide/MainContainer/VBoxContainer\")
 onready var username = (((str(OS.get_environment(\"USERNAME\")).left(5))+\"532@email>\"))
 onready var fixes_node = Tab.appParent.get_node('Mods/KINITOFIXES_NODE')
 
-var fix_friends
 
 func _ready():
-	fix_friends = fixes_node.config_info['FIX_FRIENDS']
+	#fix_friends = fixes_node.config_info['FIX_FRIENDS']
 	
 	get_node(\"TOPNAME_EMAIL\").bbcode_text = \"<\"+username
 	print(\"friend count:\",truefriendCount)
@@ -914,7 +919,7 @@ func _ready():
 			var IMAGE_DATA: Dictionary = Steam.getImageRGBA(Steam.getSmallFriendAvatar(steam_id))
 			var AVATAR: Image = Image.new()
 			var AVATAR_TEXTURE: ImageTexture = ImageTexture.new()
-			if fix_friends or IMAGE['width'] <= 0:
+			if IMAGE['width'] <= 0:
 				continue
 			AVATAR.create(IMAGE['width'], IMAGE['height'], false, Image.FORMAT_RGBAF)
 			var size = 32
@@ -3334,10 +3339,10 @@ __meta__ = {
 [connection signal="mouse_exited" from="Aspect/BGButton" to="Select" method="_on_BGButton_mouse_exited"]
 [connection signal="text_entered" from="Aspect/DEVCONSOL/LineEdit" to="Aspect/DEVCONSOL/LineEdit" method="_on_LineEdit_text_entered"]
 [connection signal="timeout" from="Side/RealClock/Timer" to="Side/RealClock/Timer" method="_on_Timer_timeout"]
-[connection signal="timeout" from="Side/RealClock/Timer" to="Side/RealClock/H" method="_on_Timer_timeout"]
 [connection signal="timeout" from="Side/RealClock/Timer" to="Side/RealClock/M" method="_on_Timer_timeout"]
+[connection signal="timeout" from="Side/RealClock/Timer" to="Side/RealClock/H" method="_on_Timer_timeout"]
 [connection signal="timeout" from="Side/Friend2/Friend/Timer" to="Side/Friend2/Friend" method="_on_Timer_timeout"]
-[connection signal="button_down" from="Side/Friend2/Friend/Button" to="Aspect" method="_on_BGButton_button_down"]
 [connection signal="button_down" from="Side/Friend2/Friend/Button" to="Side/Friend2/Friend/Button" method="_on_Button_button_down"]
+[connection signal="button_down" from="Side/Friend2/Friend/Button" to="Aspect" method="_on_BGButton_button_down"]
 [connection signal="button_up" from="Side/Friend2/Friend/Button" to="Side/Friend2/Friend/Button" method="_on_Button_button_up"]
 [connection signal="toggled" from="Side/Note/Button" to="Side" method="_on_Button_toggled"]

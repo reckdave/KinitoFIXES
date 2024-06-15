@@ -17,9 +17,9 @@ __meta__ = {
 }
 
 [node name="LOG_BOX" type="VBoxContainer" parent="GUI/Active"]
-margin_top = 60.0
+margin_top = 58.6652
 margin_right = 200.0
-margin_bottom = 1080.0
+margin_bottom = 1078.67
 mouse_filter = 2
 custom_constants/separation = 30
 __meta__ = {

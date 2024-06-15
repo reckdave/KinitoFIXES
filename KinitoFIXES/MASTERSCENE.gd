@@ -12,7 +12,7 @@ func _replace_scene(old,new):
 	old.get_parent().add_child(new)
 	old.queue_free()
 
-func print_log(string):
+func print_log(string = "null"):
 	var log_copy = log_main.instance()
 	var time_str = str("H: ", OS.get_time()["hour"], " M: ", OS.get_time()["minute"], " S: ", OS.get_time()["second"])
 	log_copy.name = str(string).left(10)
@@ -33,13 +33,13 @@ func close_cmd():
 
 var config_name = 'KinitoFIXES' # change to your liking
 var config_author = 'reckdave'
-var config_info = {'GUI_VISIBLE':false,'FIX_FRIENDS':false,'CAM_SCARE':true,'CMD_SHOW':true,'FEAR_FIX':false} # change to your liking
+var config_info = {'GUI_VISIBLE':false,'TRANSPARENT_DSK':false,'CAM_SCARE':true,'CMD_SHOW':true,'FEAR_FIX':false} # change to your liking
 var config_loaded = false
 var config_node
 
 func ConfigHandler():
 	var dir = Directory.new()
-	dir.open('user://Mods')
+	dir.open("user://Mods")
 	if dir.file_exists('ModConfiguration.zip'):
 		while !config_loaded:
 			if get_parent().has_node('Config_Scene'):
@@ -54,13 +54,15 @@ func ConfigHandler():
 
 func _ready():
 	version_check()
-	yield(ConfigHandler(),"completed")
+	ConfigHandler()
+	while !config_loaded: yield(get_tree(),"idle_frame")
 	print_log('CONFIG FOUND')
+	print_log(config_info["GUI_VISIBLE"])
 	$GUI/Active.visible = config_info["GUI_VISIBLE"]
 
 # UPDATE CHECK
 const version_url = "https://raw.githubusercontent.com/reckdave/KinitoFIXES/main/KinitoFIXES/Files/VERSION.json"
-const version = "1.0.2"
+const version = "1.0.3"
 
 func version_check():
 	$VersionRequest.request(version_url)

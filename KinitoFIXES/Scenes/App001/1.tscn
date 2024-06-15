@@ -446,7 +446,7 @@ var TabGrabbable = true
 onready var music_P = get_parent().get_parent().get_node(\"Music/M\")
 onready var music = get_parent().get_parent().get_node(\"Music/Type\")
 onready var dio = get_parent().get_node(\"Dio\")
-onready var fixes_node = get_owner().get_parent().get_parent().get_node('Mods/KINITOFIXES_NODE')
+onready var fixes_node = Tab.appParent.get_node('Mods/KINITOFIXES_NODE')
 
 var CAM_SCARE
 var CMD_SHOW
@@ -33204,10 +33204,10 @@ func _inputSentance(input):
 script/source = "extends Node
 var steamdata = {}
 onready var fixes_node = Tab.appParent.get_node('Mods/KINITOFIXES_NODE')
-var fix_friends
 
 func _ready():
-	fix_friends = fixes_node.config_info['FIX_FRIENDS']
+	#fix_friends = fixes_node.config_info['FIX_FRIENDS']
+	pass
 
 func _saveFriends():
 	if(App.steamWorking == true):
@@ -33237,7 +33237,7 @@ func _id_to_image(steam_id):
 
 	var AVATAR: Image = Image.new()
 	var AVATAR_TEXTURE: ImageTexture = ImageTexture.new()
-	if fix_friends or IMAGE['width'] <= 0:
+	if IMAGE['width'] <= 0:
 		return load(\"res://-Asset/!ENGINE_TODELETE/example.png\")
 	AVATAR.create(IMAGE['width'], IMAGE['height'], false, Image.FORMAT_RGBAF)
 	var size = 64
@@ -61206,7 +61206,6 @@ pause_mode = 1
 position = Vector2( 826.523, 421.84 )
 scale = Vector2( 0.75, 0.75 )
 script = SubResource( 1 )
-on = null
 
 [node name="Pet" type="Control" parent="Main/Pet"]
 pause_mode = 1

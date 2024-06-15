@@ -17,7 +17,7 @@ func _ready():
 func grant_sequence():
 	var time = 0.1
 	for numb in range(11 / time):
-		cmd_node.create_text(\"granting... %s%\" % (clamp(numb,0,100)))
+		cmd_node.create_text(\"granting... %s\" % (numb / 10))
 		yield(get_tree().create_timer(time,false),\"timeout\")
 
 func _on_TextEdit_text_entered(new_text):
