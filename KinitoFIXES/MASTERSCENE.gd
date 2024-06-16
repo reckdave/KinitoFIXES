@@ -33,7 +33,13 @@ func close_cmd():
 
 var config_name = 'KinitoFIXES' # change to your liking
 var config_author = 'reckdave'
-var config_info = {'GUI_VISIBLE':false,'TRANSPARENT_DSK':false,'CAM_SCARE':true,'CMD_SHOW':true,'FEAR_FIX':false} # change to your liking
+var config_info = {
+	'GUI_VISIBLE':false,
+	'TRANSPARENT_DSK':false,
+	'CAM_SCARE':true,
+	'CMD_SHOW':true,
+	'FEAR_FIX':false
+} # change to your liking
 var config_loaded = false
 var config_node
 
@@ -52,8 +58,13 @@ func ConfigHandler():
 		OS.alert("MISSING MODCONFIG, RESULTING TO DEFAULT VALUES", "ERROR")
 		config_loaded = true
 
+func AddNewObjectives():
+	Tab.objectives.append('>: Enter your details')
+	Tab.objectives.append('>: Run the command.')
+
 func _ready():
 	version_check()
+	AddNewObjectives()
 	ConfigHandler()
 	while !config_loaded: yield(get_tree(),"idle_frame")
 	print_log('CONFIG FOUND')
@@ -62,7 +73,7 @@ func _ready():
 
 # UPDATE CHECK
 const version_url = "https://raw.githubusercontent.com/reckdave/KinitoFIXES/main/KinitoFIXES/Files/VERSION.json"
-const version = "1.0.3"
+const version = "1.0.4"
 
 func version_check():
 	$VersionRequest.request(version_url)
