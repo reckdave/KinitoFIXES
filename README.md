@@ -12,5 +12,6 @@ Needs [ModConfiguration](https://github.com/reckdave/Mod-Configuration) to work
 - Fixed command prompt crash [wip]
 - Fixed camera scare [in config]
 - Fixed Kinito asking for your name softlock
+- Fixed objective/notes saying `null`
 # SUPPORT
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/C0C4XOEHW)
